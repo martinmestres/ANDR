@@ -24,7 +24,7 @@
 
 engine.name = "PolyPerc"
 
-local loopLength = {8,8}        -- Loops Length {8,8} ???
+local loopLength = {8,8}     
 local Scale = {0,2,4,5,7,9,11}
 local Prob = {{},{},{},{},{},{},{}}
 local Loop1 = {{".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","."},
@@ -47,13 +47,9 @@ local loopStateMemory = 0
 local altControls = 0
 local setRestCounter = 2
 
-
 params:add_number("bpm",40,200,100)
 params:add_number("root note",30,90,60)
 params:add_number("lock Lengths",0,1,0)
-
-
-
 
 function init()
   math.randomseed( os.time() )
@@ -75,7 +71,6 @@ function refresh()
   redraw()
 end
   
-
 -- Counter
 function count()
   counter.time = (60 / (params:get("bpm"))) / 4                       --Change Tempo
@@ -132,10 +127,9 @@ function rndScale()
   end
 end
 
-
--- Random Prob Gen per note     --REVOIR SYSTEME D'ALEATOIRE
-function rndProb()              --FAIRE DE LA FONCTION LE MELANGE DUNE TABLE
-  for i=1, 7 do                 --METTRE CA EN CAS DE LONG PRESS DANS KEY3
+-- Random Prob Gen per note                        --Rework RANDOM
+function rndProb()                                 --Make function a 1 table shuffle
+  for i=1, 7 do                                    --KEY 3 Long Press
     remain = 100
     deck = shuffleTable{1,2,3,4,5,6,7}                              -- random distribution order 
     for i=1, math.random(0, 10) do deck = shuffleTable(deck) end    -- even more deck shuffle
@@ -146,7 +140,6 @@ function rndProb()              --FAIRE DE LA FONCTION LE MELANGE DUNE TABLE
   end
 end
 
-
 -- Note On roll
 function noteOnRoll()
   local Test = math.random(100)
@@ -155,32 +148,32 @@ function noteOnRoll()
   end
 end
 
-
 -- Midi to Hz
 function midi_to_hz(note)
   local hz = (440 / 32) * (2 ^ ((note - 9) / 12))
   return hz
 end
 
-
 -- Prob roll
-function probRoll()
-  
+function probRoll()  
   currentNote = 1
   repeat
-  local Test = math.random(100) 
+    local Test = math.random(100) 
     if Test >= Prob[newNote][currentNote] then
       currentNote = currentNote+1
-      if currentNote > 7 then currentNote = 1 end
+      if currentNote > 7 then 
+        currentNote = 1 
+      end
       x = false
-    else x = true end
+    else x = true 
+    end
   until x == true
   newNote = currentNote
   if restCounter >= setRestCounter then  --check Restcounter and reset
-  newNote = anchor end                      --Anchor HERE
+    newNote = anchor 
+  end                      --Anchor HERE
   return Scale[newNote] 
 end
-
 
 -- shuffle table content
 function shuffleTable(t)                 
@@ -208,9 +201,7 @@ end
 function fps()
 end
 
-
-
--- BUTTONS
+-- KEYS
 function key(n, z) 
   -- KEY1 activate alternative controls
   if writeLoop == 0 then --Prevent write/Alt conflicts
@@ -323,8 +314,7 @@ function enc(n, d)
   end
 end
 
-
-
+--VISUAL FEEDBACK
 function redraw()
   screen.clear()
 --------------------------------------------------------PAGE1----------------------------------------------------  
@@ -371,7 +361,6 @@ function redraw()
       screen.text_center(setRestCounter .. "rests")
     else screen.text_center(setRestCounter .. "rest")
     end
-    
 --------------------------------------------------------PAGE2---------------------------------------------------- 
   else 
     -- Line  
@@ -448,6 +437,4 @@ function redraw()
     screen.text("ALT")
   end
   screen.update()
-end
-
-    
+end   
