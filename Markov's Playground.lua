@@ -127,9 +127,9 @@ function rndScale()
   end
 end
 
--- Random Prob Gen per note                        --Rework RANDOM
-function rndProb()                                 --Make function a 1 table shuffle
-  for i=1, 7 do                                    --KEY 3 Long Press
+-- Random Prob Gen per note                        
+function rndProb()                                 
+  for i=1, 7 do                                    
     remain = 100
     deck = shuffleTable{1,2,3,4,5,6,7}                              -- random distribution order 
     for i=1, math.random(0, 10) do deck = shuffleTable(deck) end    -- even more deck shuffle
