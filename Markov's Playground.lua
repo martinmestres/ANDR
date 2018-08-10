@@ -58,7 +58,9 @@ function init()
   params:set_action("cutoff", function(x) engine.cutoff(x) end)
   engine.amp(1)
   engine.pw(0.5)
-  rndProb()
+  for i=1, 7 do
+    rndProb(i)
+  end
   counter = metro.alloc(count, 0.15, -1)
   counter:start()
   refreshScreen = metro.alloc(refresh, 0.11, -1)
@@ -128,15 +130,13 @@ function rndScale()
 end
 
 -- Random Prob Gen per note                        
-function rndProb()                                 
-  for i=1, 7 do                                    
-    remain = 100
-    deck = shuffleTable{1,2,3,4,5,6,7}                              -- random distribution order 
-    for i=1, math.random(0, 10) do deck = shuffleTable(deck) end    -- even more deck shuffle
-    for j=1, 7 do                                
-      Prob[i][deck[j]] = util.clamp((math.random(0, remain)), 0, 90) -- Mixup tables + prevent 100%
-      remain = (remain - Prob[i][deck[j]]) 
-    end
+function rndProb(x)                                 
+  local remain = 100
+  local deck = shuffleTable{1,2,3,4,5,6,7}                              -- random distribution order 
+  for i=1, math.random(0, 10) do deck = shuffleTable(deck) end    -- even more deck shuffling
+  for j=1, 7 do                                
+    Prob[x][deck[j]] = util.clamp((math.random(0, remain)), 0, 90) -- Mixup tables + prevent 100%
+    remain = (remain - Prob[x][deck[j]]) 
   end
 end
 
@@ -217,7 +217,7 @@ function key(n, z)
       rndScale() end
       -- PAGE 1 Key 3 chang Probs
       if n == 3 and z == 1 then
-      rndProb() 
+      rndProb(anchor) 
       end
     end
 -------------KEYPAGE2----------------------------------------------------
