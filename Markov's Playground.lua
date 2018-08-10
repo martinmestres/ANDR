@@ -85,7 +85,7 @@ function count()
     else actRestCounter()
     end
   looper()
-  else 
+  else                                                                --Check LOOPER ON state
     rollResult = noteOnRoll()
     looper()
     if tonumber(Loop1[loopSel][loopPos[loopSel]]) ~= nil then  -- Check LOOPER ON state
@@ -97,7 +97,13 @@ function count()
             break 
           end
         end
-      else noteSel = probRoll()   
+      else 
+        rollResult = noteOnRoll()
+        if rollResult == 1 then   
+          noteSel = probRoll()
+          restCounter = 0                                                 
+        else actRestCounter()
+        end
       end
     end
   end  
@@ -114,9 +120,9 @@ function looper()
   end
   if writeLoop == 1 then
     if rollResult == 0 then
-      Loop1[loopRecSel][loopPos[loopSel]] = "."   
+      Loop1[loopRecSel][loopPos[loopRecSel]] = "."   
     else
-      Loop1[loopRecSel][loopPos[loopSel]] = noteSel
+      Loop1[loopRecSel][loopPos[loopRecSel]] = noteSel
     end  
   end
 end
