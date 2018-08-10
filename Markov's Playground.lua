@@ -214,12 +214,21 @@ function key(n, z)
     if altControls == 1 then -- ALT CONTROLS
       -- PAGE 1 Key2 change Scale 
       if n == 2 and z == 1 then             
-      rndScale() end
-      -- PAGE 1 Key 3 chang Probs
+      rndScale() 
+      end
+          -- PAGE 1 Alt Key3 change ALL Probs
+      if n == 3 and z == 1 then
+        for i=1, 7 do
+          rndProb(i) 
+        end
+      end
+    else                    -- BASE CONTROLS
+      -- PAGE 1 Key 3 chang Anchor probs
       if n == 3 and z == 1 then
       rndProb(anchor) 
-      end
+      end      
     end
+    
 -------------KEYPAGE2----------------------------------------------------
   else 
     if altControls == 1 then -- ALT CONTROLS
@@ -432,7 +441,7 @@ function redraw()
   screen.text_center("P" .. pageNumber)
   if altControls == 1 then                          --ALT Feedback
     screen.move(0, 64)
-    screen.level(blink+10)
+    screen.level(blink-5)
     screen.font_size(7)
     screen.text("ALT")
   end
