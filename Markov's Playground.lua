@@ -1,25 +1,29 @@
 --        Markov's Playground
+--  Markov's chains inspired sequencer
 -- --------------------------------
--- Page 1 & 2:
+-- GLOBAL:
 --  Enc 1: Change Page
 --  Key 1 Alternative Controls
 --
--- Page 1: 
---  Alt + Key 2 randomize SCALE
---  Alt + Key 3 randomize PROBABILITIES
---  Enc 2: Change Anchor Position
---  Enc 3: Change note generation Probability
---  Alt + Enc 2: Change Selected Note
+-- PAGE 1: 
+--  Key 2: Shift selected selection's probabilities
+--  Key 3: Randomise selected probability
+--  Enc 2: Change ANCHOR position
+--  Enc 3: Change note generation probability
+--  Alt + Enc 2: Change selected note
 --  Alt + Enc 3: Change "reset to anchor" counter
+--  Alt + Key 2: randomize scale
+--  Alt + Key 3: randomize all probabilities
+--               3sec press reset ALL
 --
--- Page 2: 
---  Key 2 PLAY selected LOOP
---  Key 3 Record LOOP *
+-- PAGE 2: 
+--  Key 2: PLAY selected LOOP
+--  Key 3: Record LOOP *
 --  Enc 2: LOOP Shift
---  Enc 3: Select Loop to PLAY
+--  Enc 3: Select LOOP to PLAY
 --  Alt + Enc 1: Selected LOOP length
---  Alt + Key 2: Select REC 1
---  Alt + Key 3: Select REC 2
+--  Alt + Key 2: Select REC LOOP 1
+--  Alt + Key 3: Select REC LOOP 2
 
 
 engine.name = "PolyPerc"
@@ -37,7 +41,7 @@ local noteSel = 1
 local loopSel = 1
 local loopRecSel = 1
 local pageNumber = 1
-local noteOnProb = 90
+local noteOnProb = 100
 local alternate = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
 local restCounter = 0
 local anchor = 1
@@ -58,9 +62,7 @@ function init()
   params:set_action("cutoff", function(x) engine.cutoff(x) end)
   engine.amp(1)
   engine.pw(0.5)
-  for i=1, 7 do
-    rndProb(i)
-  end
+  resetProb()
   counter = metro.alloc(count, 0.15, -1)
   counter:start()
   refreshScreen = metro.alloc(refresh, 0.11, -1)
@@ -181,7 +183,7 @@ function probRoll()
   return Scale[newNote] 
 end
 
--- shuffle table content
+-- Table SHUFFLER 
 function shuffleTable(t)                 
   for i = #t, 2, -1 do
     local swap = math.random(1, i)
@@ -190,6 +192,14 @@ function shuffleTable(t)
   end
 end
 
+-- Table SHIFTER
+function tableShift(x)
+  local memory = x[#x]
+  print(#x)
+  table.remove(x)
+  table.insert(x,1,memory)
+end
+    
 -- Rest Counter
 function actRestCounter()
   restCounter = restCounter + 1 
@@ -207,6 +217,13 @@ end
 function fps()
 end
 
+-- Probs Reset
+function resetProb()  
+  for i=1, 7 do
+    Prob[i] = {100,0,0,0,0,0,0}
+  end
+end
+
 -- KEYS
 function key(n, z) 
   -- KEY1 activate alternative controls
@@ -217,22 +234,33 @@ function key(n, z)
   end
 -------------KEYPAGE1----------------------------------------------------  
   if pageNumber == 1 then     
-    if altControls == 1 then -- ALT CONTROLS
+    if altControls == 1 then -------------- ALT CONTROLS
       -- PAGE 1 Key2 change Scale 
       if n == 2 and z == 1 then             
       rndScale() 
       end
-          -- PAGE 1 Alt Key3 change ALL Probs
+      -- PAGE 1 Alt Key3 change ALL Probs, LONG PRESS RESET ALL
       if n == 3 and z == 1 then
         for i=1, 7 do
           rndProb(i) 
         end
+        timeCheck = os.clock()
       end
-    else                    -- BASE CONTROLS
+      if n == 3 and z == 0 then
+      if (os.clock()-timeCheck)*10 > 3 then
+        noteOnProb = 100
+        resetProb() 
+      end
+    end 
+      
+    else ---------------------------------- BASE CONTROLS
       -- PAGE 1 Key 3 chang Anchor probs
       if n == 3 and z == 1 then
       rndProb(anchor) 
-      end      
+      end
+      if n == 2 and z == 1 then
+      tableShift(Prob[anchor])  
+      end
     end
     
 -------------KEYPAGE2----------------------------------------------------
