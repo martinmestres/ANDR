@@ -1,4 +1,4 @@
---        Markov's Playground
+--              ANDR 
 --  Markov's chains inspired sequencer
 -- --------------------------------
 -- GLOBAL:
@@ -45,7 +45,8 @@ local noteOnProb = 100
 local alternate = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
 local restCounter = 0
 local anchor = 1
-local blink = 0
+local blink = 1
+local anchorBlink = 1
 local rollResult
 local loopStateMemory = 0
 local altControls = 0
@@ -53,7 +54,7 @@ local setRestCounter = 2
 
 params:add_number("bpm",40,200,100)
 params:add_number("root note",30,90,60)
-params:add_number("lock Lengths",0,1,0)
+params:add_option("lock Lengths", {"ON","OFF"})
 
 function init()
   math.randomseed( os.time() )
@@ -72,6 +73,7 @@ end
 -- FPS
 function refresh()
   blinker()
+  anchorBlink = ((anchorBlink + 1)%4)
   redraw()
 end
   
@@ -166,14 +168,13 @@ end
 function probRoll()  
   currentNote = 1
   repeat
-    local Test = math.random(100) 
-    if Test >= Prob[newNote][currentNote] then
+    x = true
+    if math.random(100) >= Prob[newNote][currentNote] then
       currentNote = currentNote+1
       if currentNote > 7 then 
         currentNote = 1 
       end
-      x = false
-    else x = true 
+    x = false
     end
   until x == true
   newNote = currentNote
@@ -207,11 +208,20 @@ end
 
 --Blinker
 function blinker()
-  if blink == 0 then blink = 4
-  elseif blink == 4 then blink = 15
-  elseif blink == 15 then blink = 0 end
-  return blink
+  local blinkBrightness = {0, 2, 8, 13}
+  blink = ((blink + 1) % 4)+1
+  return blinkBrightness[blink]
 end
+
+--Blinker (Anchor)
+function blinkerAnchor()
+  local blinkBrightness = {1,4,8,15}
+  return blinkBrightness[anchorBlink+1]
+end
+
+
+
+
 
 -- FPS
 function fps()
@@ -228,9 +238,7 @@ end
 function key(n, z) 
   -- KEY1 activate alternative controls
   if writeLoop == 0 then --Prevent write/Alt conflicts
-  if n == 1 and z == 1 then altControls = 1 
-  elseif n == 1 and z == 0 then altControls = 0
-  end
+  if n == 1 then altControls = z end
   end
 -------------KEYPAGE1----------------------------------------------------  
   if pageNumber == 1 then     
@@ -368,7 +376,7 @@ function redraw()
     for i=1, 7 do                                   
       screen.move((12*i)+4, 6)
       if i == anchor then             --Anchor blink Feedback
-        screen.level(blink)      
+        screen.level(blinkerAnchor())      
       else screen.level(15) 
       end
       screen.font_face(1)
@@ -442,7 +450,7 @@ function redraw()
     screen.move(11, 9)                       
     if playLoop == 1 then               --Loop On Blink
       screen.rect(115, 58, 6, 6) 
-      screen.level(blink)
+      screen.level(blinker())
       screen.fill()
     elseif loopStateMemory == 1 then    --Loop On, Write On Steady State
       screen.rect(115, 58, 6, 6) 
@@ -460,7 +468,7 @@ function redraw()
     else
       screen.move(95, 64)
     end
-    if writeLoop == 1 then screen.level(blink)
+    if writeLoop == 1 then screen.level(blinker())
     else screen.level(1)
     end 
     screen.font_size(8)
@@ -475,7 +483,7 @@ function redraw()
   screen.text_center("P" .. pageNumber)
   if altControls == 1 then                          --ALT Feedback
     screen.move(0, 64)
-    screen.level(blink-5)
+    screen.level(blinker())
     screen.font_size(7)
     screen.text("ALT")
   end
