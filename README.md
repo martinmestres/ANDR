@@ -1,4 +1,4 @@
-# ANDR
+# ANDR ("Andreï")
 
 A Markov's chains inspired sequencer
 
