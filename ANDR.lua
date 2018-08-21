@@ -76,7 +76,8 @@ function refresh()
   anchorBlink = ((anchorBlink + 1)%4)
   redraw()
 end
-  
+
+
 -- Counter
 function count()
   counter.time = (60 / (params:get("bpm"))) / 4                       --Change Tempo
@@ -477,10 +478,16 @@ function redraw()
   end
 -----------------------------------------------------ALL-----------------------------------------
   --Curent page
-  screen.move(118, 6)
-  screen.level(8)
-  screen.font_size(8)
-  screen.text_center("P" .. pageNumber)
+  screen.move(115, 1)
+  if pageNumber == 1 then screen.level(15) else screen.level(2) end
+  screen.line(119, 1) 
+  screen.stroke()
+  screen.move(120, 1)
+  if pageNumber == 2 then screen.level(15) else screen.level(2) end
+  screen.line(124, 1)
+  screen.stroke()
+  -- screen.font_size(8)
+  --screen.text_center("P" .. pageNumber)
   if altControls == 1 then                          --ALT Feedback
     screen.move(0, 64)
     screen.level(blinker())
