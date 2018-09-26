@@ -26,7 +26,15 @@
 --  Alt + Key 3: Select REC LOOP 2
 
 
-engine.name = "PolyPerc"
+engine.name = "Passersby"
+local Passersby = require "mark_eats/passersby"
+local MusicUtil = require "mark_eats/musicutil"
+
+beatclock = require 'beatclock'
+clk = beatclock.new()
+clk_midi = midi.connect()
+clk_midi.event = clk.process_midi
+
 
 local loopLength = {8,8}     
 local Scale = {0,2,4,5,7,9,11}
@@ -52,17 +60,13 @@ local loopStateMemory = 0
 local altControls = 0
 local setRestCounter = 2
 
-params:add_number("bpm",40,200,100)
+params:add_number("bpm",40,200,127)
 params:add_number("root note",30,90,60)
 params:add_option("lock Lengths", {"ON","OFF"})
 
 function init()
+  Passersby.add_params()
   math.randomseed( os.time() )
-  engine.cutoff(4000)
-  params:add_control("cutoff",controlspec.new(60,10000,'exp',2,4000,'hz'))
-  params:set_action("cutoff", function(x) engine.cutoff(x) end)
-  engine.amp(1)
-  engine.pw(0.5)
   resetProb()
   counter = metro.alloc(count, 0.15, -1)
   counter:start()
@@ -85,7 +89,8 @@ function count()
     rollResult = noteOnRoll()
     if rollResult == 1 then   
       noteSel = probRoll()
-      engine.hz(midi_to_hz(params:get("root note") + noteSel))        --Play note
+      --engine.hz(midi_to_hz(params:get("root note") + noteSel))        --Play note
+      engine.noteOn(params:get("root note") + noteSel, MusicUtil.note_num_to_freq(params:get("root note") + noteSel), 1)
       restCounter = 0                                                 --Rester Counter
     else actRestCounter()
     end
@@ -94,7 +99,8 @@ function count()
     rollResult = noteOnRoll()
     looper()
     if tonumber(Loop1[loopSel][loopPos[loopSel]]) ~= nil then  -- Check LOOPER ON state
-      engine.hz(midi_to_hz(params:get("root note") + Loop1[loopSel][loopPos[loopSel]]))
+      --engine.hz(midi_to_hz(params:get("root note") + Loop1[loopSel][loopPos[loopSel]]))
+      engine.noteOn(params:get("root note") + Loop1[loopSel][loopPos[loopSel]], MusicUtil.note_num_to_freq(params:get("root note") + Loop1[loopSel][loopPos[loopSel]]), 1)
       if loopSel == loopRecSel then
         for i=1, 7 do
           if Loop1[loopSel][loopPos[loopSel]] == Scale[i] then         
@@ -304,7 +310,7 @@ end
 function enc(n, d)
   --Page change
   if altControls == 0 and n == 1 then
-    pageNumber = util.clamp((pageNumber + d),1,2)                         
+    pageNumber = util.clamp((pageNumber + d),1,3)                         
   end  
 -------------ENCPAGE1----------------------------------------------------
   if pageNumber == 1 then
@@ -364,6 +370,9 @@ function enc(n, d)
       end
     end
   end
+  -------------ENCPAGE3---------------------------------------------------- 
+  if pageNumber == 3 then
+  end
 end
 
 --VISUAL FEEDBACK
@@ -415,6 +424,7 @@ function redraw()
     end
 --------------------------------------------------------PAGE2---------------------------------------------------- 
   else 
+    screen.clear()
     -- Line  
     screen.level(2 - loopSel)       -- Loop 1 selection FeedBack
     screen.rect(0, 30, 128, 4)                             
@@ -476,15 +486,23 @@ function redraw()
     screen.font_face(1)
     screen.text("REC".. loopRecSel) 
   end
+  --------------------------------------------------------PAGE3----------------------------------------------------  
+  if pageNumber == 3 then
+    screen.clear()
+  end
 -----------------------------------------------------ALL-----------------------------------------
   --Curent page
-  screen.move(115, 1)
+  screen.move(112, 1)
   if pageNumber == 1 then screen.level(15) else screen.level(2) end
-  screen.line(119, 1) 
+  screen.line(116, 1) 
   screen.stroke()
-  screen.move(120, 1)
+  screen.move(117, 1)
   if pageNumber == 2 then screen.level(15) else screen.level(2) end
-  screen.line(124, 1)
+  screen.line(121, 1)
+  screen.stroke()
+  screen.move(122, 1)
+  if pageNumber == 3 then screen.level(15) else screen.level(2) end
+  screen.line(126, 1)
   screen.stroke()
   -- screen.font_size(8)
   --screen.text_center("P" .. pageNumber)
