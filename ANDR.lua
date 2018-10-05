@@ -370,10 +370,6 @@ function enc(n, d)
       end
     end
   end
-  -------------ENCPAGE3---------------------------------------------------- 
-  if pageNumber == 3 then
-  end
-end
 
 --VISUAL FEEDBACK
 function redraw()
@@ -486,10 +482,7 @@ function redraw()
     screen.font_face(1)
     screen.text("REC".. loopRecSel) 
   end
-  --------------------------------------------------------PAGE3----------------------------------------------------  
-  if pageNumber == 3 then
-    screen.clear()
-  end
+
 -----------------------------------------------------ALL-----------------------------------------
   --Curent page
   screen.move(112, 1)
@@ -499,10 +492,6 @@ function redraw()
   screen.move(117, 1)
   if pageNumber == 2 then screen.level(15) else screen.level(2) end
   screen.line(121, 1)
-  screen.stroke()
-  screen.move(122, 1)
-  if pageNumber == 3 then screen.level(15) else screen.level(2) end
-  screen.line(126, 1)
   screen.stroke()
   -- screen.font_size(8)
   --screen.text_center("P" .. pageNumber)
