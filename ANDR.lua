@@ -30,12 +30,6 @@ engine.name = "Passersby"
 local Passersby = require "mark_eats/passersby"
 local MusicUtil = require "mark_eats/musicutil"
 
-beatclock = require 'beatclock'
-clk = beatclock.new()
-clk_midi = midi.connect()
-clk_midi.event = clk.process_midi
-
-
 local loopLength = {8,8}     
 local Scale = {0,2,4,5,7,9,11}
 local Prob = {{},{},{},{},{},{},{}}
@@ -65,6 +59,7 @@ params:add_number("root note",30,90,60)
 params:add_option("lock Lengths", {"ON","OFF"})
 
 function init()
+  
   Passersby.add_params()
   math.randomseed( os.time() )
   resetProb()
@@ -74,17 +69,14 @@ function init()
   refreshScreen:start()
 end
 
--- FPS
 function refresh()
   blinker()
   anchorBlink = ((anchorBlink + 1)%4)
   redraw()
 end
 
-
 -- Counter
-function count()
-  counter.time = (60 / (params:get("bpm"))) / 4                       --Change Tempo
+function count()                     --Change Tempo
   if playLoop == 0 then                                               --Check LOOPER OFF state
     rollResult = noteOnRoll()
     if rollResult == 1 then   
@@ -226,14 +218,6 @@ function blinkerAnchor()
   return blinkBrightness[anchorBlink+1]
 end
 
-
-
-
-
--- FPS
-function fps()
-end
-
 -- Probs Reset
 function resetProb()  
   for i=1, 7 do
@@ -370,6 +354,10 @@ function enc(n, d)
       end
     end
   end
+  -------------ENCPAGE3---------------------------------------------------- 
+  if pageNumber == 3 then
+  end
+end
 
 --VISUAL FEEDBACK
 function redraw()
@@ -482,7 +470,10 @@ function redraw()
     screen.font_face(1)
     screen.text("REC".. loopRecSel) 
   end
-
+  --------------------------------------------------------PAGE3----------------------------------------------------  
+  if pageNumber == 3 then
+    screen.clear()
+  end
 -----------------------------------------------------ALL-----------------------------------------
   --Curent page
   screen.move(112, 1)
@@ -492,6 +483,10 @@ function redraw()
   screen.move(117, 1)
   if pageNumber == 2 then screen.level(15) else screen.level(2) end
   screen.line(121, 1)
+  screen.stroke()
+  screen.move(122, 1)
+  if pageNumber == 3 then screen.level(15) else screen.level(2) end
+  screen.line(126, 1)
   screen.stroke()
   -- screen.font_size(8)
   --screen.text_center("P" .. pageNumber)
