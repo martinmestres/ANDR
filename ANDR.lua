@@ -58,11 +58,17 @@ local rollResult
 local loopStateMemory = 0
 local altControls = 0
 local setRestCounter = 2
+local clockState = 1
 
+local tick = 0
+local ON = 1
+
+params:add_option("CLOCK","clock", {"INT","EXT"})
+params:add_option("lock_lengths","lock lengths", {"ON","OFF"})
+  
 function init()
   params:add_number("bpm","bpm",40,200,127)
   params:add_number("root_note","root note",30,90,60)
-  params:add_option("lock_lengths","lock lengths", {"ON","OFF"})
   params:add_separator()
   Passersby.add_params()
   math.randomseed( os.time() )
@@ -73,6 +79,28 @@ function init()
   refreshScreen:start()
 end
 
+clk_midi = midi.connect()
+clk_midi.event = function(data)           
+  if params:get("CLOCK") == 2 then
+    counter:stop()
+    clockState = 2
+    if data[1] == 252 then 
+      ON = 0
+      tick = 0
+    elseif data[1] == 250 then ON = 1 
+    end
+    if data[1] == 248 and ON == 1 then
+      tick = tick + 1
+      if tick == 7 then tick = 1 end 
+      if tick == 1 then count() end
+    end
+  elseif params:get("CLOCK") == 1 and clockState == 2 then 
+    counter:start() 
+    clockState = 1
+  end 
+end
+
+
 function refresh()
   blinker()
   anchorBlink = ((anchorBlink + 1)%4)
@@ -81,12 +109,14 @@ end
 
 -- Counter
 function count()                     --Change Tempo
+print(rollResult)
   if playLoop == 0 then                                               --Check LOOPER OFF state
     rollResult = noteOnRoll()
     if rollResult == 1 then
       noteSel = probRoll()
       --engine.hz(midi_to_hz(params:get("root note") + noteSel))        --Play note
       engine.noteOn(params:get("root_note") + noteSel, MusicUtil.note_num_to_freq(params:get("root_note") + noteSel), 1)
+      clk_midi.note_on((params:get("root_note") + noteSel),127)
       restCounter = 0                                                 --Rester Counter
     else actRestCounter()
     end
@@ -97,6 +127,7 @@ function count()                     --Change Tempo
     if tonumber(Loop1[loopSel][loopPos[loopSel]]) ~= nil then  -- Check LOOPER ON state
       --engine.hz(midi_to_hz(params:get("root note") + Loop1[loopSel][loopPos[loopSel]]))
       engine.noteOn(params:get("root_note") + Loop1[loopSel][loopPos[loopSel]], MusicUtil.note_num_to_freq(params:get("root_note") + Loop1[loopSel][loopPos[loopSel]]), 1)
+     
       if loopSel == loopRecSel then
         for i=1, 7 do
           if Loop1[loopSel][loopPos[loopSel]] == Scale[i] then
@@ -156,7 +187,7 @@ end
 -- Note On roll
 function noteOnRoll()
   local Test = math.random(100)
-  if Test >= noteOnProb then return 0
+  if Test > noteOnProb then return 0
   else return 1
   end
 end
