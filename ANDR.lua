@@ -63,9 +63,12 @@ local clockState = 1
 local tick = 0
 local ON = 1
 
+
 params:add_option("CLOCK","clock", {"INT","EXT"})
+params:add_number("midi_port","MIDI Port",1,4,1)
 params:add_option("lock_lengths","lock lengths", {"ON","OFF"})
-  
+-- params:add{type = "trigger", id = "change_port", name = "Change Port", action = clk_midi:reconnect(params:get(c))}
+
 function init()
   params:add_number("bpm","bpm",40,200,127)
   params:add_number("root_note","root note",30,90,60)
@@ -109,7 +112,7 @@ end
 
 -- Counter
 function count()                     --Change Tempo
-print(rollResult)
+--print(params:get("midi_port"))
   if playLoop == 0 then                                               --Check LOOPER OFF state
     rollResult = noteOnRoll()
     if rollResult == 1 then
@@ -127,7 +130,7 @@ print(rollResult)
     if tonumber(Loop1[loopSel][loopPos[loopSel]]) ~= nil then  -- Check LOOPER ON state
       --engine.hz(midi_to_hz(params:get("root note") + Loop1[loopSel][loopPos[loopSel]]))
       engine.noteOn(params:get("root_note") + Loop1[loopSel][loopPos[loopSel]], MusicUtil.note_num_to_freq(params:get("root_note") + Loop1[loopSel][loopPos[loopSel]]), 1)
-     
+      clk_midi.note_on((params:get("root_note") + Loop1[loopSel][loopPos[loopSel]]),127)
       if loopSel == loopRecSel then
         for i=1, 7 do
           if Loop1[loopSel][loopPos[loopSel]] == Scale[i] then
